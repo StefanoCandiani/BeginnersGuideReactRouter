@@ -1,20 +1,33 @@
 import React, { Fragment } from 'react';
 import './index.css';
 
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, Switch, Redirect } from 'react-router-dom';
 
 export default function App() {
+  const name = 'John Doe'
+  const isAuthenticated = true;
   return (
     <Router>
       <main>
         <nav>
           <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to={`/about/${name}`}>About</Link></li>
+            <li><Link to="/contact">Contact</Link></li>
           </ul>
         </nav>
-        <Route path="/" render={() => <h1>Welcome!</h1>} />
+        <Switch>
+          <Route path="/" exact component={Home}/>
+          {
+            isAuthenticated ?
+            <>
+            <Route path="/about/:name" component={About}/>
+            <Route path="/contact" component={Contact}/>
+            </> : <Redirect to="/" />  
+          }
+
+          <Route render={() => <h1>404: Page not Found</h1>} />        
+        </Switch>
       </main>      
     </Router>
 
@@ -30,17 +43,20 @@ const Home = () => (
 )
 
 // About Page
-const About = () => (
+const About = ({match:{params:{name}}}) => (
+  // Same as props.match.params.name
   <Fragment>
-    <h1>About</h1>
+    { name !== 'John Doe' ? <Redirect to="/" /> : null}
+    <h1>About {name}</h1>
     <FakeText />    
   </Fragment>
 )
 
 // Contact Page
-const Contact = () => (
+const Contact = ({history}) => (
   <Fragment>
     <h1>Contact</h1>
+    <button onClick={() => history.push('/')}>Go to Home</button>
     <FakeText />
   </Fragment>
 )
